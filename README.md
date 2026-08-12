@@ -6,6 +6,8 @@ Spotify's shuffle kept annoying me for not being random, so I made this flask we
 
 ![shuffle button](screenshots/picker-2.png)
 
+![replaced](screenshots/shuffled.png)
+
 Web mode — opens a page where I tick which playlists to shuffle:
 
 ```
