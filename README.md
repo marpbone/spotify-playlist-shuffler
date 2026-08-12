@@ -2,6 +2,9 @@
 
 Spotify's shuffle kept annoying me for not being random, so I made this flask web app that shuffles your playlist in a random order by moving the track with the reorder endpoint. This is far better than deleting and re-adding a new playlist, so if it crashes mid way I don't lose a playlist. I found out the hard way :(
 
+![playlist picker](screenshots/picker.png)
+
+![shuffle button](screenshots/picker-2.png)
 
 Web mode — opens a page where I tick which playlists to shuffle:
 

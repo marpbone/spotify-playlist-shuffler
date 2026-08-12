@@ -1,4 +1,3 @@
-
 import argparse
 import os
 import random
@@ -67,13 +66,6 @@ def get_own_playlists(sp: spotipy.Spotify) -> list[dict]:
     return playlists
 
 
-def track_count(pl: dict):
-    # spotify randomly omits this field on some playlists (found out the hard way)
-    tracks = pl.get("tracks") or {}
-    total = tracks.get("total")
-    return total if total is not None else "?"
-
-
 def shuffle_playlist(sp: spotipy.Spotify, playlist_id: str) -> tuple[str, int]:
     # fisher-yates but every swap is an api call to the reorder endpoint.
     # slow on big playlists but the playlist is never missing tracks at any
@@ -81,7 +73,7 @@ def shuffle_playlist(sp: spotipy.Spotify, playlist_id: str) -> tuple[str, int]:
     info = sp.playlist(playlist_id, fields="name,snapshot_id,tracks.total")
     name = info.get("name", playlist_id)
     total = (info.get("tracks") or {}).get("total")
-    if total is None:  # see track_count()
+    if total is None:  # spotify sometimes just doesn't send this
         total = sp.playlist_items(playlist_id, fields="total")["total"]
     snapshot = info["snapshot_id"]
 
@@ -118,7 +110,6 @@ PAGE = """
   h1 { color: #1db954; font-size: 1.5rem; }
   label { display: block; padding: .5rem .75rem; border-radius: 8px; cursor: pointer; }
   label:hover { background: #1e1e1e; }
-  .count { color: #888; font-size: .85rem; }
   button { background: #1db954; color: #000; border: 0; border-radius: 999px;
            padding: .75rem 2rem; font-size: 1rem; font-weight: 600;
            cursor: pointer; margin-top: 1rem; }
@@ -183,13 +174,13 @@ def playlists():
     token = auth_manager.validate_token(auth_manager.cache_handler.get_cached_token())
     if not token:
         return redirect("/")
-    sp = spotipy.Spotify(auth_manager=auth_manager)
+    sp = spotipy.Spotify(auth_manager=auth_manager, requests_timeout=15)
     items = get_own_playlists(sp)
     if not items:
         return render("<p>No playlists found that you can modify.</p>")
     boxes = "\n".join(
         f"<label><input type='checkbox' name='playlist' value='{pl['id']}'> "
-        f"{pl.get('name', pl['id'])} <span class='count'>({track_count(pl)} tracks)</span></label>"
+        f"{pl.get('name', pl['id'])}</label>"
         for pl in items
     )
     return render(
@@ -217,8 +208,8 @@ def shuffle():
             lines.append(f"<li class='err'>&#10007; {pid} — failed: {exc}</li>")
     return render(
         f"<ul>{''.join(lines)}</ul>"
-        "<p>Done! You can close this tab and stop the app (Ctrl+C in the "
-        "terminal), or <a href='/playlists'>shuffle more playlists</a>.</p>"
+        "<p>Done! <a href='/playlists'>shuffle more playlists</a></p>"
+        "\n(ctrl+c in terminal)"
     )
 
 
@@ -242,7 +233,7 @@ def cli_mode(args):
 
     if args.list:
         for pl in get_own_playlists(sp):
-            print(f"{pl['id']}  {pl.get('name', '?')} ({track_count(pl)} tracks)")
+            print(f"{pl['id']}  {pl.get('name', '?')}")
         return
 
     failures = 0
