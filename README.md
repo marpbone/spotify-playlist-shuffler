@@ -30,5 +30,5 @@ First run opens a browser to log in to Spotify, after that the token sits in `.c
 - `pip install -r requirements.txt`
 - `python app.py`
 - auth got weird, delete `.cache` and logging in again worked
-- big playlists take a while (~one API call per track) — the price of never being able to lose the playlist
+- bigger playlists take a while (~one API call per track) (the price of never being able to lose the playlist)
 
